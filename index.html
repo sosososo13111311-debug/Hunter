@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOGE/USDC مؤشر العقود الآجلة - Binance Futures</title>
+    <meta name="description" content="مؤشر أسعار العقود الآجلة DOGE/USDC المباشر من Binance Futures مع تحليل متعدد الفريمات ونظام 7 محركات">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Cairo:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Animated Background Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Connection Status Bar -->
+    <div class="status-bar" id="statusBar">
+        <div class="status-indicator" id="statusIndicator"></div>
+        <span class="status-text" id="statusText">جاري الاتصال...</span>
+        <span class="latency" id="latency"></span>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 40 40" width="40" height="40">
+                        <circle cx="20" cy="20" r="18" fill="none" stroke="url(#logoGrad)" stroke-width="2"/>
+                        <text x="20" y="26" text-anchor="middle" fill="url(#logoGrad)" font-size="18" font-weight="bold" font-family="Arial">Ð</text>
+                        <defs>
+                            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FFD700"/>
+                                <stop offset="100%" style="stop-color:#FFA500"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>DOGE <span class="pair-separator">/</span> USDC</h1>
+                    <span class="exchange-badge">BINANCE FUTURES</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="live-badge" id="liveBadge">
+                    <span class="live-dot"></span>
+                    LIVE
+                </div>
+                <div class="clock" id="clock"></div>
+            </div>
+        </header>
+
+        <!-- Price Hero Section -->
+        <section class="price-hero">
+            <div class="price-main-wrapper">
+                <div class="price-label">السعر الحالي</div>
+                <div class="price-main" id="priceMain">
+                    <span class="price-value" id="priceValue">--</span>
+                    <span class="price-currency">USDC</span>
+                </div>
+                <div class="price-change-row">
+                    <div class="price-change" id="priceChange">
+                        <span class="change-value" id="changeValue">--</span>
+                        <span class="change-percent" id="changePercent">(--%)</span>
+                    </div>
+                    <div class="last-update" id="lastUpdate">في انتظار البيانات...</div>
+                </div>
+                <!-- Bid/Ask from bookTicker -->
+                <div class="bid-ask-row">
+                    <div class="bid-box">
+                        <span class="ba-label">BID</span>
+                        <span class="ba-value bid-val" id="bidPrice">--</span>
+                    </div>
+                    <div class="spread-box">
+                        <span class="ba-label">SPREAD</span>
+                        <span class="ba-value spread-val" id="spread">--</span>
+                    </div>
+                    <div class="ask-box">
+                        <span class="ba-label">ASK</span>
+                        <span class="ba-value ask-val" id="askPrice">--</span>
+                    </div>
+                </div>
+            </div>
+            <div class="price-flash" id="priceFlash"></div>
+        </section>
+
+        <!-- Stats Grid -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon high-icon">▲</div>
+                <div class="stat-content">
+                    <span class="stat-label">أعلى سعر 24 ساعة</span>
+                    <span class="stat-value" id="high24h">--</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon low-icon">▼</div>
+                <div class="stat-content">
+                    <span class="stat-label">أدنى سعر 24 ساعة</span>
+                    <span class="stat-value" id="low24h">--</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon vol-icon">◆</div>
+                <div class="stat-content">
+                    <span class="stat-label">حجم التداول (DOGE)</span>
+                    <span class="stat-value" id="volume24h">--</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon quote-icon">$</div>
+                <div class="stat-content">
+                    <span class="stat-label">حجم التداول (USDC)</span>
+                    <span class="stat-value" id="quoteVolume">--</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon open-icon">○</div>
+                <div class="stat-content">
+                    <span class="stat-label">سعر الافتتاح</span>
+                    <span class="stat-value" id="openPrice">--</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon trades-icon">#</div>
+                <div class="stat-content">
+                    <span class="stat-label">عدد الصفقات</span>
+                    <span class="stat-value" id="tradeCount">--</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════ -->
+        <!--  MULTI-TIMEFRAME ANALYSIS SECTION (NEW)          -->
+        <!-- ══════════════════════════════════════════════════ -->
+        <section class="mtf-section">
+            <div class="section-header">
+                <h2>⚡ تحليل متعدد الفريمات</h2>
+            </div>
+
+            <!-- Timeframe Tabs -->
+            <div class="tf-tabs" id="tfTabs">
+
+                <button class="tf-tab active" data-tf="15m" id="tab-15m">
+                    <span class="tab-fire" id="fire-15m"></span>
+                    <span class="tf-tab-label">15 دقيقة</span>
+                    <span class="tf-tab-status" id="tabStatus-15m">--</span>
+                </button>
+                <button class="tf-tab" data-tf="30m" id="tab-30m">
+                    <span class="tab-fire" id="fire-30m"></span>
+                    <span class="tf-tab-label">30 دقيقة</span>
+                    <span class="tf-tab-status" id="tabStatus-30m">--</span>
+                </button>
+                <button class="tf-tab" data-tf="1h" id="tab-1h">
+                    <span class="tab-fire" id="fire-1h"></span>
+                    <span class="tf-tab-label">1 ساعة</span>
+                    <span class="tf-tab-status" id="tabStatus-1h">--</span>
+                </button>
+                <button class="tf-tab" data-tf="4h" id="tab-4h">
+                    <span class="tab-fire" id="fire-4h"></span>
+                    <span class="tf-tab-label">4 ساعات</span>
+                    <span class="tf-tab-status" id="tabStatus-4h">--</span>
+                </button>
+                <button class="tf-tab" data-tf="1d" id="tab-1d">
+                    <span class="tab-fire" id="fire-1d"></span>
+                    <span class="tf-tab-label">يومي</span>
+                    <span class="tf-tab-status" id="tabStatus-1d">--</span>
+                </button>
+                <button class="tf-tab hunter-tab" data-tf="hunter" id="tab-hunter">
+                    <span class="tab-fire" id="fire-hunter"></span>
+                    <span class="tf-tab-label">🎯 صياد الصفقات</span>
+                    <span class="tf-tab-status" id="tabStatus-hunter">--</span>
+                </button>
+            </div>
+
+            <!-- Timeframe Content Panel -->
+            <div class="tf-panel" id="tfPanel">
+                <!-- Top bar: Price + Countdown -->
+                <div class="tf-top-bar">
+                    <div class="tf-price-box">
+                        <span class="tf-price-label">سعر إغلاق الشمعة</span>
+                        <span class="tf-price-value" id="tfPrice">--</span>
+                    </div>
+                    <div class="tf-countdown-box">
+                        <span class="tf-countdown-label">إغلاق الشمعة</span>
+                        <span class="countdown-value" id="tfCountdown">--:--</span>
+                    </div>
+                    <div class="tf-target-box">
+                        <span class="tf-target-label">الهدف</span>
+                        <span class="tf-target-value" id="tfTarget">-- نقطة</span>
+                    </div>
+                </div>
+
+                <!-- Active Trade Banner (shown when trade is open) -->
+                <div class="active-trade-banner bull" id="activeTradeBanner" style="display:none">
+                    <span class="atb-label" id="atbLabel">🟢 صفقة صعود جارية</span>
+                    <span class="atb-entry" id="atbEntry">دخول: --</span>
+                    <span class="atb-arrow">→</span>
+                    <span class="atb-target" id="atbTarget">هدف: --</span>
+                    <span class="atb-pts" id="atbPts">0 / -- نقطة</span>
+                </div>
+
+                <!-- Mini Candlestick Chart -->
+                <div class="tf-chart-container">
+                    <canvas id="tfCandleChart"></canvas>
+                </div>
+
+                <!-- Engine Scores -->
+                <div class="tf-engines" id="tfEngines">
+                    <div class="engine-title">المحركات السبعة (7-Engine Confluence)</div>
+                    <div class="engines-grid" id="enginesGrid">
+                        <!-- Filled dynamically -->
+                    </div>
+                    <div class="engine-score-row">
+                        <span class="engine-score-label">النتيجة:</span>
+                        <span class="engine-score-value" id="engineScore">0/7 صعود | 0/7 هبوط</span>
+                    </div>
+                </div>
+
+                <!-- Trade History for this TF -->
+                <div class="tf-trade-history" id="tfTradeHistory">
+                    <div class="trade-history-title">سجل الصفقات</div>
+                    <div class="trade-history-list" id="tradeHistoryList">
+                        <div class="trade-placeholder">لا توجد صفقات بعد</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hunter Panel (Hidden by default) -->
+            <div class="tf-panel" id="hunterPanel" style="display:none">
+                <div class="hunter-dashboard">
+                    <div class="hunter-title">🔥 صياد الصفقات (Master Hunter) 🔥</div>
+                    <div class="hunter-subtitle">يراقب توافق الاتجاه عبر جميع الفريمات لانتقاء الصفقات الذهبية بهدف 20 نقطة</div>
+                    
+                    <!-- Smart Analyzer Section -->
+                    <div class="smart-analyzer-container">
+                        <div class="smart-buttons-row">
+                            <button id="btnSmartAnalyzer" class="btn-smart-inactive">🧠 تشغيل المفكر الذكي</button>
+                            <button id="btnSmartHealer" class="btn-healer-inactive">🛡️ تشغيل المعالج الفوري</button>
+                        </div>
+                        <div id="smartAnalyzerLogPanel" class="smart-log-panel" style="display:none;">
+                            <div class="smart-log-header" id="smartLogHeader">🧠 المعالج والمفكر الذكي: تحليل هيكلة السوق اللحظية (صراع البقاء)</div>
+                            <div id="smartAnalyzerLog" class="smart-log-content"></div>
+                        </div>
+                    </div>
+
+                    <!-- Consensus Radar -->
+                    <div class="hunter-radar" id="hunterRadar">
+                        <!-- Dynamically filled with TF boxes -->
+                    </div>
+
+                    <!-- Hunter Decision Box -->
+                    <div class="hunter-decision" id="hunterDecision">
+                        <div class="hunter-votes" id="hunterVotes">شراء: 0 | بيع: 0</div>
+                        <div class="hunter-status" id="hunterStatus">مراقبة التوافق...</div>
+                        <!-- Entry Quality Label (shown during active trade) -->
+                        <div id="hunterEntryQuality" style="margin-top:8px;font-size:0.82rem;font-weight:600;padding:5px 10px;border-radius:8px;background:rgba(255,255,255,0.05);display:block;min-height:22px;"></div>
+                    </div>
+
+                    <!-- Active Hunter Trade Banner -->
+                    <div class="active-trade-banner" id="hunterTradeBanner" style="display:none; font-size:1.2rem; padding:20px; box-shadow: 0 0 30px rgba(255,82,82,0.8);">
+                        <div class="hunter-fire-bg"></div>
+                        <div style="position:relative; z-index:2; width:100%;">
+                            <span class="atb-label" id="hunterAtbLabel" style="display:block; text-align:center; font-size:1.5rem; font-weight:bold; margin-bottom:10px;">🔥 صفقة قنص جارية 🔥</span>
+                            <div style="display:flex; justify-content:center; gap:20px;">
+                                <span class="atb-entry" id="hunterAtbEntry">دخول: --</span>
+                                <span class="atb-arrow">→</span>
+                                <span class="atb-target" id="hunterAtbTarget">هدف: --</span>
+                            </div>
+                            <div style="text-align:center; margin-top:10px; font-size:1.5rem; font-weight:bold;" id="hunterAtbPts">0 / 21 نقطة</div>
+                            <div id="hunterAtbLog" style="margin-top: 15px; font-size: 0.8rem; color: rgba(255,255,255,0.7); background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; text-align: right; line-height: 1.5; font-family: monospace;">
+                                <!-- Live vote log will appear here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tf-trade-history" id="hunterTradeHistory">
+                        <div class="trade-history-title">سجل صفقات القناص</div>
+                        <div class="trade-history-list" id="hunterHistoryList">
+                            <div class="trade-placeholder">لا توجد صفقات قنص بعد</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+
+        <!-- Live Trades Feed -->
+        <section class="trades-section">
+            <div class="section-header">
+                <h2>آخر الصفقات المباشرة</h2>
+                <div class="trades-counter">
+                    <span id="tradesPerSec">0</span> صفقة/ثانية
+                </div>
+            </div>
+            <div class="trades-table-wrapper">
+                <div class="trades-header-row">
+                    <span>السعر</span>
+                    <span>الكمية</span>
+                    <span>القيمة</span>
+                    <span>الوقت</span>
+                </div>
+                <div class="trades-feed" id="tradesFeed">
+                    <div class="trade-placeholder">في انتظار الصفقات...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mini Chart -->
+        <section class="chart-section">
+            <div class="section-header">
+                <h2>حركة السعر (آخر 100 صفقة)</h2>
+            </div>
+            <div class="chart-container">
+                <canvas id="priceChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <span>بيانات العقود الآجلة المباشرة من Binance Futures WebSocket API</span>
+            <span class="ticker-count" id="tickerCount">0 تحديث</span>
+        </footer>
+    </div>
+
+    <!-- Scripts: order matters -->
+    <script src="indicators.js"></script>
+    <script src="timeframes.js"></script>
+    <script src="signals.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
